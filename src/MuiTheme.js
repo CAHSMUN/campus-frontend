@@ -176,6 +176,14 @@ const mainTheme = createTheme ({
             root: {
                 borderRadius: 0,
             }
+        },
+        MuiCard: {
+            root: {
+                boxShadow: 'none',
+                border: '1px solid #EEEEEE',
+                boxSizing: 'border-box',
+                padding: '1vw'
+            }
         }
     },
 });

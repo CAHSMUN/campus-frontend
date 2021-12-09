@@ -45,7 +45,6 @@ const SchoolsList = (props) => {
               overflow: 'auto',
           }}>
             <Button
-              disabled
               variant="text"
               color="primary"
               onClick={e=>params.value.detail_fn(`./schools/detail/${params.value.school_id}`)}>

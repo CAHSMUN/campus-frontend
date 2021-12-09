@@ -13,6 +13,7 @@ import SchoolRegistration from './screens/registration/SchoolRegistration';
 // Sec screen imports
 import Sponsors from './screens/secretariat/Sponsors';
 import Schools from './screens/secretariat/Schools';
+import SchoolDetail from './screens/secretariat/SchoolDetail';
 
 // Sponsor screen imports
 import SponsorDelegates from './screens/sponsor/SponsorDelegates';
@@ -87,6 +88,7 @@ function App() {
         {/* <SecRoute exact path='/secretariat/matrix' component={Matrix} /> */}
         <SecretariatRoute exact path='/secretariat/sponsors' component={Sponsors} />
         <SecretariatRoute exact path='/secretariat/schools' component={Schools} />
+        <SecretariatRoute exact path='/secretariat/schools/detail/:id' component={SchoolDetail} />
         
         <SponsorRoute exact path='/sponsor/delegates' component={SponsorDelegates} />
         {/* <SponsorRoute exact path='/sponsor/rooming' component={SponsorRooming} /> */}

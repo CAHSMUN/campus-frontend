@@ -71,3 +71,12 @@ hr {
   display: table;
 }
 
+.detail-grid {
+  display:grid;
+  grid-template-columns: 1fr 2fr;
+  row-gap: 0.75em;
+}
+
+.detail-grid .detail-key {
+  font-weight:500;
+}

@@ -43,14 +43,15 @@ const Home = () => {
                             </Button>
                         </Grid>
                     ) : (
-                        <Grid item xs={6}>
-                            <Button className='large-button' variant='outlined' style={{width:'100%',}} component={Link} to={'/register/school'}>
-                                <div style={styles.largeButton}>
-                                    <span style={styles.bigText}>Register a School</span>
-                                    <span>Must be a sponsor teacher or head delegate.</span>
-                                </div>
-                            </Button>
-                        </Grid>
+                        <div></div>
+                        // <Grid item xs={6}>
+                        //     <Button className='large-button' variant='outlined' style={{width:'100%',}} component={Link} to={'/register/school'}>
+                        //         <div style={styles.largeButton}>
+                        //             <span style={styles.bigText}>Register a School</span>
+                        //             <span>Must be a sponsor teacher or head delegate.</span>
+                        //         </div>
+                        //     </Button>
+                        // </Grid>
                     )}
                     {currentUser ? '' : (
                         <Grid item xs={6}>
