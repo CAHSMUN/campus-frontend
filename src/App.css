@@ -9,6 +9,7 @@
 
 ::-webkit-scrollbar {
   width:5px;
+  height:5px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -79,4 +80,62 @@ hr {
 
 .detail-grid .detail-key {
   font-weight:500;
+}
+
+.matrix-container {
+  position:absolute;
+}
+
+.matrix-head {
+  padding:2vw 2vw 1vw 2vw;
+  position:fixed;
+  display:flex;
+  column-gap: 1.5em;
+  z-index:-1;
+}
+
+.matrix-head img {
+  width:80px;
+}
+
+.matrix-body {
+  margin-top:calc(3vw + 100px);
+  position:sticky;
+  top:0;
+  background:white;
+
+  display:flex;
+  overflow:none;
+  gap:1px;
+}
+
+.matrix-body .committee {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:flex-start;
+  
+  gap:1px;
+}
+
+.matrix-body .committee .item {
+  padding:0.7em 1em;
+  width:200px;
+}
+
+.matrix-body .committee .item.head {
+  background:black;
+  color:white;
+  font-weight:500;
+  padding:1em;
+  position:sticky;
+  top:0;
+}
+
+.matrix-body .committee .item.vacant {
+  background:rgba(29, 216, 29, 0.322);
+}
+
+.matrix-body .committee .item.taken {
+  background:rgba(192, 67, 67, 0.479);
 }

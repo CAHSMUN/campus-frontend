@@ -40,6 +40,10 @@ const mainTheme = createTheme ({
         },
         subtitle1: {
             fontWeight: '600',
+        },
+        subtitle2: {
+            fontWeight: '500',
+            opacity: '0.7',
         }
     },
     overrides: {

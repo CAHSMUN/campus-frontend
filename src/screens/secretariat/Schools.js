@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { 
     Button,
     Container, 
-    Grid,
     Typography
 } from '@material-ui/core';
 import Navigation from '../../components/Navigation';

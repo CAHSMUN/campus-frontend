@@ -6,6 +6,7 @@ import { AuthProvider, useAuthContext } from './authentication/AuthContext';
 import Home from './screens/Home';
 import Login from './screens/Login';
 import Dashboard from './screens/Dashboard';
+import Matrix from './screens/Matrix';
 
 // Reg form imports
 import SchoolRegistration from './screens/registration/SchoolRegistration';
@@ -14,6 +15,7 @@ import SchoolRegistration from './screens/registration/SchoolRegistration';
 import Sponsors from './screens/secretariat/Sponsors';
 import Schools from './screens/secretariat/Schools';
 import SchoolDetail from './screens/secretariat/SchoolDetail';
+import Work from './screens/Chacuterie'
 
 // Sponsor screen imports
 import SponsorDelegates from './screens/sponsor/SponsorDelegates';
@@ -77,15 +79,20 @@ function App() {
     <AuthProvider>
       <Switch>
 
+        
+        <Route exact path='/work' component={Work} />
+
+
         <Route exact path='/' component={Home} />
         <Route exact path='/login' component={Login} />
         
         <Route exact path='/register/school' component={SchoolRegistration} />
+        <Route exact path='/matrix' component={Matrix} />
 
         <AuthRoute exact path='/dash' component={Dashboard} />
         
-        {/* <SecRoute exact path='/secretariat/delegates' component={SecretariatDelegates} /> */}
-        {/* <SecRoute exact path='/secretariat/matrix' component={Matrix} /> */}
+        {/* <SecretariatRoute exact path='/secretariat/delegates' component={SecretariatDelegates} /> */}
+        {/* <SecretariatRoute exact path='/secretariat/matrix' component={Matrix} /> */}
         <SecretariatRoute exact path='/secretariat/sponsors' component={Sponsors} />
         <SecretariatRoute exact path='/secretariat/schools' component={Schools} />
         <SecretariatRoute exact path='/secretariat/schools/detail/:id' component={SchoolDetail} />
