@@ -43,7 +43,15 @@ const Home = () => {
                             </Button>
                         </Grid>
                     ) : (
-                        // <div></div>
+                    <>
+                        <Grid item xs={6}>
+                            <Button className='large-button' variant='outlined' style={{width:'100%',}} component={Link} to={'/register/delegate'}>
+                                <div style={styles.largeButton}>
+                                    <span style={styles.bigText}>Register as a delegate</span>
+                                    <span>Must be a student of a registered school.</span>
+                                </div>
+                            </Button>
+                        </Grid>
                         <Grid item xs={6}>
                             <Button className='large-button' variant='outlined' style={{width:'100%',}} component={Link} to={'/register/school'}>
                                 <div style={styles.largeButton}>
@@ -52,16 +60,7 @@ const Home = () => {
                                 </div>
                             </Button>
                         </Grid>
-                    )}
-                    {currentUser ? '' : (
-                        <Grid item xs={6}>
-                            <Button className='large-button' variant='outlined' style={{width:'100%',}} disabled>
-                                <div style={styles.largeButton}>
-                                    <span style={styles.bigText}>Register as a delegate</span>
-                                    <span>Must be a student of a registered school.</span>
-                                </div>
-                            </Button>
-                        </Grid>
+                    </>
                     )}
                     <Grid item xs={6}>
                         <Button className='large-button' variant='outlined' style={{width:'100%',}} component={Link} to={'/matrix'}>

@@ -10,11 +10,14 @@ import Matrix from './screens/Matrix';
 
 // Reg form imports
 import SchoolRegistration from './screens/registration/SchoolRegistration';
+import DelegateRegistration from './screens/registration/DelegateRegistration';
 
 // Sec screen imports
 import Sponsors from './screens/secretariat/Sponsors';
 import Schools from './screens/secretariat/Schools';
 import SchoolDetail from './screens/secretariat/SchoolDetail';
+import Delegates from './screens/secretariat/Delegates';
+import DelegateDetail from './screens/secretariat/DelegateDetail';
 import Work from './screens/Chacuterie'
 
 // Sponsor screen imports
@@ -86,12 +89,14 @@ function App() {
         <Route exact path='/' component={Home} />
         <Route exact path='/login' component={Login} />
         
+        <Route exact path='/register/delegate' component={DelegateRegistration} />
         <Route exact path='/register/school' component={SchoolRegistration} />
         <Route exact path='/matrix' component={Matrix} />
 
         <AuthRoute exact path='/dash' component={Dashboard} />
         
-        {/* <SecretariatRoute exact path='/secretariat/delegates' component={SecretariatDelegates} /> */}
+        <SecretariatRoute exact path='/secretariat/delegates' component={Delegates} />
+        <SecretariatRoute exact path='/secretariat/delegates/detail/:id' component={DelegateDetail} />
         {/* <SecretariatRoute exact path='/secretariat/matrix' component={Matrix} /> */}
         <SecretariatRoute exact path='/secretariat/sponsors' component={Sponsors} />
         <SecretariatRoute exact path='/secretariat/schools' component={Schools} />

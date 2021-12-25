@@ -85,32 +85,34 @@ const Matrix = () => {
     }, [committeesData])
 
     return (
-        <div className='matrix-container'>
+        <>
             {dataLoading && <LinearProgress />}
+            <div className='matrix-container'>
 
-            <div className='matrix-head'>
-                
-                <img src="/logo192.png" alt="CAHSMUN" />
-                <div style={{
-                    display:"flex",
-                    flexDirection: "column",
-                    justifyContent: "center"
-                }}>
-                    <h2 style={{
-                        margin:0,
-                    }}>Country Matrix</h2>
-                    <Typography variant="subtitle2">
-                        Scroll + Shift for horizontal scrolling
-                    </Typography>
+                <div className='matrix-head'>
+                    
+                    <img src="/logo192.png" alt="CAHSMUN" />
+                    <div style={{
+                        display:"flex",
+                        flexDirection: "column",
+                        justifyContent: "center"
+                    }}>
+                        <h2 style={{
+                            margin:0,
+                        }}>Country Matrix</h2>
+                        <Typography variant="subtitle2">
+                            Scroll + Shift for horizontal scrolling
+                        </Typography>
+                    </div>
+                    
                 </div>
-                
-            </div>
 
-            <div className="matrix-body">
-                {displayMatrix}
-            </div>
+                <div className="matrix-body">
+                    {displayMatrix}
+                </div>
 
-        </div>
+            </div>
+        </>
     )
 }
 

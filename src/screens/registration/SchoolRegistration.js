@@ -363,7 +363,7 @@ const SchoolRegistration = () => {
 
                 <Typography variant="subtitle1">Account Information</Typography>
                 <Typography variant="body1" style={{margin: '1rem 0'}}>
-                    To view and manage registration status and rooming, Campus requires an account to be made by everyone who registers a school.
+                    To view and manage registration status, Campus requires an account to be made by everyone who registers a school.
                 </Typography>
                 
                 <FormGroup style={{marginTop:20}}>

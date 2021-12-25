@@ -11,7 +11,6 @@ import Navigation from '../../components/Navigation';
 import { useAuthContext } from "../../authentication/AuthContext";
 import { API_URL } from "../../config";
 import axios from "axios";
-import { useHistory } from "react-router-dom";
 
 const SchoolDetail = ({ match }) => {
 

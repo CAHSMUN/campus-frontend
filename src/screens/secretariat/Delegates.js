@@ -5,13 +5,13 @@ import {
     Typography
 } from '@material-ui/core';
 import Navigation from '../../components/Navigation';
-import SchoolsList from "../../components/SchoolsList";
+import DelegatesList from "../../components/DelegatesList";
 import { useAuthContext } from "../../authentication/AuthContext";
 import { API_URL } from "../../config";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
 
-const Schools = () => {
+const Delegates = () => {
 
     const { currentUser } = useAuthContext();
     
@@ -19,24 +19,24 @@ const Schools = () => {
 
     const [dataLoading, setDataLoading] = useState(true);
     const [dataRefresh, setDataRefresh] = useState(false);
-    const [schoolsData, setSchoolsData] = useState([]);
+    const [delegatesData, setDelegatesData] = useState([]);
     
     function handleDetail(link) {
         history.push(link);
     }
 
-    async function loadSchools() {
+    async function loadDelegates() {
         setDataLoading(true);
 
         try {
-            let res = await axios.get(`${API_URL}/schools/`, {
+            let res = await axios.get(`${API_URL}/delegates/`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'auth-token': currentUser,
                 }
             });
             let functional_list = res.data.map((item) => {return {...item, action: {school_id: item._id, detail_fn: handleDetail}} });
-            setSchoolsData(functional_list);
+            setDelegatesData(functional_list);
             setDataLoading(false);
 
         } catch(error) {
@@ -45,7 +45,7 @@ const Schools = () => {
     }
 
     useEffect(() => {
-        loadSchools();
+        loadDelegates();
     }, [dataRefresh]);
 
     return (
@@ -56,16 +56,16 @@ const Schools = () => {
                 <Typography variant="subtitle1" 
                     style={{
                         marginBottom: '3rem',
-                    }}>Schools</Typography>
+                    }}>Delegates</Typography>
 
                 
-                <SchoolsList
+                <DelegatesList
                   refresh={dataRefresh}
                   loading={dataLoading}
-                  data={schoolsData} />
+                  data={delegatesData} />
             </Container>
         </div>
     )
 }
 
-export default Schools;
+export default Delegates;

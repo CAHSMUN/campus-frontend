@@ -103,7 +103,7 @@ const Navigation = () => {
                 
                 {(role === 'SECRETARIAT') ? (
                     <>
-                        <ListItem button disabled className={classes.menuLink} component={NavLink} exact to="/secretariat/delegates" activeStyle={linkActiveStyle}>
+                        <ListItem button className={classes.menuLink} component={NavLink} exact to="/secretariat/delegates" activeStyle={linkActiveStyle}>
                             <PersonIcon className={classes.icons} />
                             <ListItemText disableTypography primary={'Delegates'} />
                         </ListItem>
