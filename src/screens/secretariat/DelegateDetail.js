@@ -75,7 +75,11 @@ const DelegateDetail = ({ match }) => {
     }
 
     useEffect(() => {
+
         loadSchool(match.params.id);
+    }, [])
+
+    useEffect(() => {
 
         if(delegateData) {
             let displayData = [];
