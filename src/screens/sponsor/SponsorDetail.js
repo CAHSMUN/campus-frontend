@@ -12,7 +12,7 @@ import { useAuthContext } from "../../authentication/AuthContext";
 import { API_URL } from "../../config";
 import axios from "axios";
 
-const SchoolDetail = ({ match }) => {
+const SponsorDetail = ({ match }) => {
 
     const { currentUser } = useAuthContext();
     
@@ -20,40 +20,34 @@ const SchoolDetail = ({ match }) => {
 
     const [dataLoading, setDataLoading] = useState(true);
     const [dataRefresh, setDataRefresh] = useState(false);
-    const [schoolData, setSchoolData] = useState({});
-    const [displaySchoolData, setDisplaySchoolData] = useState([]);
+    const [sponsorData, setSponsorData] = useState({});
+    const [displaySponsorData, setDisplaySponsorData] = useState([]);
 
     const prettify = {
         lastUpdated: "Last Updated",
         name: "Name",
-        adminEmail: "Admin Contact",
-        district: "School District",
-        address1: "Address 1",
-        address2: "Address 2",
-        city: "City",
-        province: "Province",
-        postal: "Postal/Zip Code",
-        sponsorPresent: "Present Sponsor?",
-        schoolPayment: "Payment via School?",
-        expectedSize: "Expected Delegation Size",
-        additionalInfo: "Additional Info"
+        phoneNumber: "Phone Number",
+        email: "Email",
+        school: "School ID",
     }
 
-    async function loadSchool(id) {
+    async function loadSponsor(id) {
         setDataLoading(true);
 
         if(!typeof id === "string") return
 
         try {
-            let res = await axios.get(`${API_URL}/schools/${id}`, {
+            let res = await axios.get(`${API_URL}/sponsors/${id}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'auth-token': currentUser,
                 }
             });
             
-            setSchoolData(res.data);
+            setSponsorData(res.data);
             setDataLoading(false);
+
+            console.log(res.data)
 
         } catch(error) {
             setDataLoading(false);
@@ -61,46 +55,46 @@ const SchoolDetail = ({ match }) => {
     }
 
     useEffect(() => {
-        if(Object.keys(schoolData) < 1) {
-            loadSchool(match.params.id);
+        if(Object.keys(sponsorData).length < 1) {
+            loadSponsor(match.params.id);
         }
 
-        if(schoolData) {
+        if(sponsorData) {
             let displayData = [];
 
-            Object.keys(schoolData).map((key) => {
+            Object.keys(sponsorData).map((key) => {
                 if(prettify[key]) {
                     displayData.push(
                         <>
                             <div key={key} className="detail-key">
                                 {prettify[key]}
                             </div>
-                            <div key={schoolData[key]} className="detail-item">
-                                {typeof schoolData[key] === "boolean" ? schoolData[key] === true ? "Yes" : "No" : schoolData[key]}
+                            <div key={sponsorData[key]} className="detail-item">
+                                {typeof sponsorData[key] === "boolean" ? sponsorData[key] === true ? "Yes" : "No" : sponsorData[key]}
                             </div>
                         </>
                     )
                 }
             })
 
-            setDisplaySchoolData(displayData);
+            setDisplaySponsorData(displayData);
         }
-    }, [match, schoolData, dataRefresh]);
+    }, [match, sponsorData, dataRefresh]);
 
     return (
         <div className='app-container'>
             <Navigation />
 
             <Container maxWidth="md">
-                <Typography variant="subtitle1">School Detail</Typography>
+                <Typography variant="subtitle1">Sponsor Detail</Typography>
                 <Typography variant="subtitle2" 
                     style={{
                         marginBottom: '3rem',
-                    }}>{schoolData.name}</Typography>
+                    }}>{sponsorData.name}</Typography>
 
                 <Card>
                     <div className="detail-grid">
-                        {displaySchoolData}
+                        {displaySponsorData}
                     </div>
                 </Card>
             </Container>
@@ -108,4 +102,4 @@ const SchoolDetail = ({ match }) => {
     )
 }
 
-export default SchoolDetail;
+export default SponsorDetail;

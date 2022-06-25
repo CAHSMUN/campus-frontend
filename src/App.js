@@ -22,6 +22,7 @@ import Work from './screens/Chacuterie'
 
 // Sponsor screen imports
 import SponsorDelegates from './screens/sponsor/SponsorDelegates';
+import SponsorDetail from './screens/sponsor/SponsorDetail';
 
 function App() {
 
@@ -99,6 +100,7 @@ function App() {
         <SecretariatRoute exact path='/secretariat/delegates/detail/:id' component={DelegateDetail} />
         {/* <SecretariatRoute exact path='/secretariat/matrix' component={Matrix} /> */}
         <SecretariatRoute exact path='/secretariat/sponsors' component={Sponsors} />
+        <SecretariatRoute exact path='/secretariat/sponsors/detail/:id' component={SponsorDetail} />
         <SecretariatRoute exact path='/secretariat/schools' component={Schools} />
         <SecretariatRoute exact path='/secretariat/schools/detail/:id' component={SchoolDetail} />
         

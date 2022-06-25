@@ -44,7 +44,7 @@ const SponsorsList = (props) => {
               overflow: 'auto',
           }}>
             <Button
-              disabled
+              // disabled
               variant="text"
               color="primary"
               onClick={e=>params.value.detail_fn(`./sponsors/detail/${params.value.sponsor_id}`)}>
