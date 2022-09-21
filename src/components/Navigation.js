@@ -7,6 +7,7 @@ import { NavLink, useHistory } from 'react-router-dom';
 import { useAuthContext } from '../authentication/AuthContext';
 import { makeStyles } from '@material-ui/core/styles';
 import PersonIcon from '@material-ui/icons/Person' 
+import SettingsIcon from '@material-ui/icons/Settings' 
 import DescriptionIcon from '@material-ui/icons/Description';
 import WorkIcon from '@material-ui/icons/Work';
 import AssignmentIcon from '@material-ui/icons/Assignment';
@@ -25,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
         fontSize: '1rem',
     },
     drawer: {
-      width: 'calc(75px + 2vw)',
+      width: 76.1,
       flexShrink: 0,
       zIndex: 700,
     },
@@ -118,7 +119,7 @@ const Navigation = () => {
                             <ListItemText disableTypography primary={'Schools'} />
                         </ListItem>
 
-                        <ListItem button disabled className={classes.menuLink} component={NavLink} exact to="/secretariat/matrix" activeStyle={linkActiveStyle}>
+                        <ListItem button className={classes.menuLink} component={NavLink} exact to="/secretariat/matrix" activeStyle={linkActiveStyle}>
                             <AssignmentIcon className={classes.icons}/>
                             <ListItemText disableTypography primary={'Matrix'} />
                         </ListItem> 
@@ -155,10 +156,17 @@ const Navigation = () => {
 
             <div className='list-item-action'>
                 {(role === 'SECRETARIAT') ? (
-                    <ListItem button disabled className={classes.menuLink} component={NavLink} exact to="/secretariat/export" activeStyle={linkActiveStyle}>
-                        <SupervisorAccountIcon className={classes.icons}/>
-                        <ListItemText disableTypography primary={'Export'} />
-                    </ListItem> 
+                    <>                        
+                        <ListItem button className={classes.menuLink} component={NavLink} exact to="/secretariat/export" activeStyle={linkActiveStyle}>
+                            <SupervisorAccountIcon className={classes.icons}/>
+                            <ListItemText disableTypography primary={'Export'} />
+                        </ListItem> 
+                        
+                        <ListItem button className={classes.menuLink} component={NavLink} exact to="/secretariat/setup" activeStyle={linkActiveStyle}>
+                            <SettingsIcon className={classes.icons} />
+                            <ListItemText disableTypography primary={'Setup'} />
+                        </ListItem>
+                    </>
                 ) : ''}
                 <ListItem button className={classes.menuLink} onClick={e=>handleLogout()}>
                     <ExitToAppIcon className={classes.icons}/>

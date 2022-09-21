@@ -3,8 +3,11 @@ import {
     Container, 
     Grid
 } from '@material-ui/core';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthContext } from '../authentication/AuthContext';
+import { API_URL } from '../config';
 
 import LogoBlack from '../img/black.png';
 
@@ -23,14 +26,33 @@ const styles = {
 
 const Home = () => {
 
-    const { currentUser } = useAuthContext();
+    const { currentUser, getUserData } = useAuthContext();
+    const role = currentUser ? getUserData().role : ''
+
+    const [year, setYear] = useState('')
+
+    const getYear = async () => {
+        
+        const res = await axios.get(`${API_URL}/auth/admin/flag/conferenceYear`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'auth-token': currentUser
+            }
+        })
+
+        setYear(res.data.note)
+    }
+
+    useEffect(() => {
+        getYear()
+    }, [])
 
     return (
         <div className='app-container'>
             <Container maxWidth='md'>
                 <img src={LogoBlack} alt='logo' width='80px' />
                 <h1 style={{userSelect:'none',}}>CAHSMUN Campus</h1>
-                <h2 style={{userSelect:'none',}}>Register for CAHSMUN 2022</h2>
+                <h3 style={{userSelect:'none',}}>Register for CAHSMUN {year || ''}</h3>
 
                 <Grid container spacing={1} style={{marginTop: '5vh'}}>
                     {currentUser ? (
@@ -38,7 +60,15 @@ const Home = () => {
                             <Button className='large-button' variant='outlined' style={{width:'100%',}} component={Link} to={'/dash'} >
                                 <div style={styles.largeButton}>
                                     <span style={styles.bigText}>Dashboard</span>
-                                    <span>View your registration status.</span>
+                                    {role === 'SECRETARIAT' ? (
+                                        <span>
+                                            Manage CAHSMUN Campus
+                                        </span>
+                                    ) : (
+                                        <span>
+                                            View your registration status.
+                                        </span>
+                                    )}
                                 </div>
                             </Button>
                         </Grid>

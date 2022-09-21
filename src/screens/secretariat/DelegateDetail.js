@@ -59,14 +59,14 @@ const DelegateDetail = ({ match }) => {
         if(!typeof id === "string") return
 
         try {
-            let res = await axios.get(`${API_URL}/delegates/${id}`, {
+            let res = await axios.get(`${API_URL}/schools/${id}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'auth-token': currentUser,
                 }
             });
             
-            setDelegateData(res.data);
+            setDisplaySchoolData(res.data.name);
             setDataLoading(false);
 
         } catch(error) {
@@ -74,34 +74,27 @@ const DelegateDetail = ({ match }) => {
         }
     }
 
-    useEffect(() => {
+    async function loadDelegate() {
+        if(!typeof id === "string") return
 
-        loadSchool(match.params.id);
-    }, [])
-
-    useEffect(() => {
-
-        if(delegateData) {
-            let displayData = [];
-
-            Object.keys(delegateData).map((key) => {
-                if(prettify[key]) {
-                    displayData.push(
-                        <>
-                            <div key={key} className="detail-key">
-                                {prettify[key]}
-                            </div>
-                            <div key={delegateData[key]} className="detail-item">
-                                {delegateData[key]}
-                            </div>
-                        </>
-                    )
+        try {
+            let res = await axios.get(`${API_URL}/delegates/${match.params.id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'auth-token': currentUser,
                 }
-            })
-
-            setDisplaySchoolData(displayData);
+            });
+            
+            setDelegateData(res.data);
+            loadSchool(res.data.school)
+        } catch(error) {
+            setDataLoading(false);
         }
-    }, [match, delegateData, dataRefresh]);
+    }
+
+    useEffect(() => {
+        loadDelegate()
+    }, [])
 
     return (
         <div className='app-container'>
@@ -116,7 +109,24 @@ const DelegateDetail = ({ match }) => {
 
                 <Card>
                     <div className="detail-grid">
-                        {displaySchoolData}
+                        {delegateData && Object.keys(delegateData).map((key, index) => {
+                            return prettify[key] ? (
+                                <div key={index} className="detail-grid-row">
+                                    <div key={key} className="detail-key">
+                                        {prettify[key]}
+                                    </div>
+                                    <div className="detail-item">
+                                        {key === 'school' ? displaySchoolData : key === 'pastConferences' ? (
+                                            <div style={{
+                                                whiteSpace: 'pre-wrap'
+                                            }}>
+                                                {delegateData[key]}
+                                            </div>
+                                        ) : delegateData[key]}
+                                    </div>
+                                </div>
+                            ) : ''
+                        })}
                     </div>
                 </Card>
             </Container>

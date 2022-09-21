@@ -36,7 +36,7 @@ const Sponsors = () => {
                     'auth-token': currentUser,
                 }
             });
-            console.log(res.data);
+            // console.log(res.data);
 
             let functional_list = res.data.map((item) => {return {...item, action: {sponsor_id: item._id, detail_fn: handleDetail}} });
             setSponsorsData(functional_list);

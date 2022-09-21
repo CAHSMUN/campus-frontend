@@ -49,6 +49,8 @@ a.inline-link {
 } a.inline-link:hover {
   opacity:0.8;
   background: #F5F8FF;
+} a.inline-link:active {
+  outline: solid 1px;
 }
 
 .large-button .MuiButton-label {
@@ -68,6 +70,9 @@ hr {
   margin-top:-5px;
 }
 
+.bare-outline-box {
+  border:1px solid #EEEEEE;
+}
 .outline-box {
   text-align: left;
   padding:10px 20px 40px 20px;
@@ -82,6 +87,11 @@ hr {
 }
 
 .detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.detail-grid-row {
   display:grid;
   grid-template-columns: 1fr 2fr;
   row-gap: 0.75em;
@@ -147,4 +157,15 @@ hr {
 
 .matrix-body .committee .item.taken {
   background:rgba(192, 67, 67, 0.479);
+}
+
+.hoverable {
+  transition: all 0.13s cubic-bezier(0.165, 0.84, 0.44, 1); 
+}
+.hoverable:hover {
+  background: #EEE;
+  filter: brightness(0.9);
+}
+.hoverable:active {
+  transform: scale(0.92);
 }

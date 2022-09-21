@@ -25,9 +25,7 @@ const Delegates = () => {
         history.push(link);
     }
 
-    async function loadDelegates() {
-        setDataLoading(true);
-
+    async function loadDelegates(schoolsMap) {
         try {
             let res = await axios.get(`${API_URL}/delegates/`, {
                 headers: {
@@ -35,17 +33,40 @@ const Delegates = () => {
                     'auth-token': currentUser,
                 }
             });
-            let functional_list = res.data.map((item) => {return {...item, action: {school_id: item._id, detail_fn: handleDetail}} });
+            console.log(res.data)
+            let functional_list = res.data.map((item) => {return {...item, school: schoolsMap[item.school], action: {school_id: item._id, detail_fn: handleDetail}} });
             setDelegatesData(functional_list);
-            setDataLoading(false);
 
+            setDataLoading(false);
         } catch(error) {
             setDataLoading(false);
         }
     }
 
+    async function loadSchools() {
+        try {
+            let res = await axios.get(`${API_URL}/schools/`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'auth-token': currentUser
+                }
+            })
+            
+            let schoolIdToName = {}
+
+            for (let i = 0; i < res.data.length; i++) {
+                schoolIdToName[res.data[i]._id] = res.data[i].name
+            }
+            
+            loadDelegates(schoolIdToName)
+        } catch (error) {
+            console.error(error)
+            setDataLoading(false)
+        }
+    }
+
     useEffect(() => {
-        loadDelegates();
+        loadSchools()
     }, [dataRefresh]);
 
     return (

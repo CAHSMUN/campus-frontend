@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { 
     Button, 
@@ -323,13 +323,47 @@ const SchoolRegistration = () => {
         }
     }
 
+    const [regOpen, setRegOpen] = useState(true)
+    const [conferenceYear, setConferenceYear] = useState()
+    
+    const loadOpen = async () => {
+        try {
+            let res = await axios.get(`${API_URL}/auth/admin/flag/isRegistrationOpen`, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+            setRegOpen(res.data.flag)
+        } catch(error) {
+            console.error(error)
+        }
+    }
+
+    const loadFlags = async () => {
+        try {
+            let res = await axios.get(`${API_URL}/auth/admin/flag/conferenceYear`, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+            setConferenceYear(res.data.note)
+        } catch(error) {
+            console.error(error)
+        }
+    }
+
+    useEffect(() => {
+        loadOpen()
+        loadFlags()
+    }, [])
+
     return regSuccess ? (
         <div className='app-container'>
             <Container maxWidth='sm'>
                 <Link to={'/'}>
                     <img src={LogoBlack} alt='logo' width='80px' style={{marginBottom: '1rem'}} />
                 </Link>
-                <Typography variant="h5">CAHSMUN 2022</Typography>
+                <Typography variant="h5">CAHSMUN {conferenceYear}</Typography>
                 <Typography variant="body1" style={{color: 'rgba(0, 0, 0, 0.54)'}}>School Registration</Typography>
 
                 <Alert severity="success" style={{marginTop:'1rem'}}>
@@ -338,13 +372,13 @@ const SchoolRegistration = () => {
                 </Alert>
             </Container>
         </div>
-    ) : (
+    ) : regOpen ? (
         <div className='app-container'>
             <Container maxWidth='sm'>
                 <Link to={'/'}>
                     <img src={LogoBlack} alt='logo' width='80px' style={{marginBottom: '1rem'}} />
                 </Link>
-                <Typography variant="h5">CAHSMUN 2022</Typography>
+                <Typography variant="h5">CAHSMUN {conferenceYear}</Typography>
                 <Typography variant="body1" style={{color: 'rgba(0, 0, 0, 0.54)'}}>School Registration</Typography>
 
                 <Typography style={{paddingTop: '1rem'}} variant="body1">
@@ -628,6 +662,21 @@ const SchoolRegistration = () => {
                     )}
                 </Button>
 
+            </Container>
+        </div>
+    ) : (
+        <div className='app-container'>
+            <Container maxWidth='sm'>
+                <Link to={'/'}>
+                    <img src={LogoBlack} alt='logo' width='80px' style={{marginBottom: '1rem'}} />
+                </Link>
+                <Typography variant="h5">CAHSMUN {conferenceYear}</Typography>
+                <Typography variant="body1" style={{color: 'rgba(0, 0, 0, 0.54)'}}>School Registration</Typography>
+
+                <Alert severity="warning" style={{marginTop:'1rem'}}>
+                    {/* <AlertTitle>Registration Success</AlertTitle> */}
+                    Registration is closed for CAHSMUN {conferenceYear}
+                </Alert>
             </Container>
         </div>
     )

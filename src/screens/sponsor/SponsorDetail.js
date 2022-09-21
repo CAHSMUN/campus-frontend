@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { 
-    Button,
+import {
     Card,
-    Container, 
-    Grid,
-    LinearProgress,
-    Typography
+    Container, Typography
 } from '@material-ui/core';
-import Navigation from '../../components/Navigation';
-import { useAuthContext } from "../../authentication/AuthContext";
-import { API_URL } from "../../config";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useAuthContext } from "../../authentication/AuthContext";
+import Navigation from '../../components/Navigation';
+import { API_URL } from "../../config";
 
 const SponsorDetail = ({ match }) => {
 

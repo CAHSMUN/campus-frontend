@@ -18,9 +18,10 @@ import {
 } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { Link } from 'react-router-dom';
+import { loadStripe } from '@stripe/stripe-js';
 
 import LogoBlack from '../../img/black.png';
-import { API_URL } from '../../config';
+import { API_URL, getCurrentPayment, STRIPE_KEY } from '../../config';
 import FormInput from '../../components/FormInput';
 import FormSelect from '../../components/FormSelect';
 
@@ -56,6 +57,8 @@ const emptyFormState = {
 
 const DelegateRegistration = () => {
 
+    const stripePromise = loadStripe(STRIPE_KEY)
+
     const [regSuccess, setRegSuccess] = useState(false);
     const [loading, setLoading] = useState(false); // proceed to payment
 
@@ -64,6 +67,10 @@ const DelegateRegistration = () => {
     const [committees, setCommittees] = useState([]) // array of committees
     const [displayCommittees, setDisplayCommittees] = useState([]);
     const [committeeMap, setCommitteeMap] = useState();
+    const [conferenceYear, setConferenceYear] = useState();
+    const [regOpen, setRegOpen] = useState(true)
+    const [registrationPeriods, setRegistrationPeriods] = useState()
+    const [currentPeriod, setCurrentPeriod] = useState()
 
     const renderSchools = (data) => {
         let renderData = [];
@@ -126,9 +133,56 @@ const DelegateRegistration = () => {
             console.error(error)
         }
     }
+    
+    const loadOpen = async () => {
+        try {
+            let res = await axios.get(`${API_URL}/auth/admin/flag/all`, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
 
+            const featureToData = {}
+            for (let i = 0; i < res.data.featureFlags.length; i++) { 
+                const { feature, flag, note } = res.data.featureFlags[i]
+                if (feature === 'isRegistrationOpen') {
+                    featureToData[feature] = flag
+                } else {
+                    featureToData[feature] = note
+                }
+            }
+
+            setRegOpen(featureToData.isRegistrationOpen)
+            setConferenceYear(featureToData.conferenceYear)
+            const periods = {
+                early: featureToData.earlyEndFlag,
+                regular: featureToData.regEndFlag,
+                late: featureToData.lateEndFlag
+            }
+
+            const currRegPeriod = getCurrentPayment(periods)
+            let price = ''
+
+            await fetch(`https://api.stripe.com/v1/prices/${currRegPeriod.price_id}`, {
+                headers: {
+                    Authorization: `Bearer sk_live_uXEEtV1ZtqWkBgXfRVQKhleC00Unlw4lQ6`
+                }
+            }).then((res) => res.json()).then((data) => {
+                price = data.unit_amount_decimal.substring(0, data.unit_amount_decimal.length - 2)
+                console.log(price)
+            })
+
+
+            setCurrentPeriod({...currRegPeriod, price})
+            setRegistrationPeriods(periods)
+
+        } catch(error) {
+            console.error(error)
+        }
+    }
 
     useEffect(() => {
+        loadOpen()
         loadSchools()
         loadCommittees()
     }, [])
@@ -137,7 +191,7 @@ const DelegateRegistration = () => {
 
 
     const [capacity, setCapacity] = useState('') // is head delegate or not? CONDITIONAL: create delegate or update in backend
-    const [attendance, setAttendance] = useState('') // is online or inperson
+    const [attendance, setAttendance] = useState('inperson') // is online or inperson // REVISION: Fully in person
 
     // Registration information
     const [formData, setFormData] = useState({});
@@ -180,13 +234,12 @@ const DelegateRegistration = () => {
     }
 
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         // should save and then go to stripe payment
+        if (loading) return
 
         // debug only rn
-        console.log(formData);
         setLoading(!loading);
-
 
         // All verified by now
         axios
@@ -194,8 +247,7 @@ const DelegateRegistration = () => {
         .then((res) => {
         
             setLoading(false);
-            setRegSuccess(true);
-        
+            
         }).catch((error) => {
             setLoading(false);
             if(error.response) {
@@ -204,6 +256,26 @@ const DelegateRegistration = () => {
                 console.error('Connection with server is bad');
             }
         });
+
+        const stripe = await stripePromise
+            
+            // proceed to payment
+            const { error } = await stripe.redirectToCheckout({
+                lineItems: [{
+                    price: currentPeriod.price_id, // Replace with the ID of your price TODO 
+                    quantity: 1,
+                }],
+                mode: 'payment',
+                successUrl: 'https://register.cahsmun.org/success',
+                cancelUrl: 'https://register.cahsmun.org/cancel',
+                customerEmail: formData.email,
+            });
+
+            setRegSuccess(true);
+            
+            if (error) {
+                console.error(error)
+            }
     }
 
 
@@ -213,33 +285,33 @@ const DelegateRegistration = () => {
                 <Link to={'/'}>
                     <img src={LogoBlack} alt='logo' width='80px' style={{marginBottom: '1rem'}} />
                 </Link>
-                <Typography variant="h5">CAHSMUN 2022</Typography>
-                <Typography variant="body1" style={{color: 'rgba(0, 0, 0, 0.54)'}}>School Registration</Typography>
+                <Typography variant="h5">CAHSMUN {conferenceYear}</Typography>
+                <Typography variant="body1" style={{color: 'rgba(0, 0, 0, 0.54)'}}>Delegate Registration</Typography>
 
                 <Alert severity="success" style={{marginTop:'1rem'}}>
                     <AlertTitle>Registration Success</AlertTitle>
-                    You have successfully for CAHSMUN 2022. You may log in to the system to view your registration status.
+                    You have successfully for CAHSMUN {conferenceYear}. You may log in to the system to view your registration status.
                 </Alert>
             </Container>
         </div>
-    ) : (
+    ) : regOpen ? (
         <div className='app-container'>
             <Container maxWidth='sm'>
                 <Link to={'/'}>
                     <img src={LogoBlack} alt='logo' width='80px' style={{marginBottom: '1rem'}} />
                 </Link>
-                <Typography variant="h5">CAHSMUN 2022</Typography>
+                <Typography variant="h5">CAHSMUN {conferenceYear}</Typography>
                 <Typography variant="body1" style={{color: 'rgba(0, 0, 0, 0.54)'}}>Delegate Registration</Typography>
 
                 <Typography style={{paddingTop: '1rem'}} variant="body1">
-                    Thank you for your interest in CAHSMUN 2022. This year, the conference will run from April 1st to 3rd. Please fill out the following form to complete your registration for the conference.
+                    Thank you for your interest in CAHSMUN {conferenceYear}. Please fill out the following form to complete your registration for the conference.
                     {/* Once you have submitted this form, your delegation’s primary contact will receive a confirmation email regarding the status of your school’s registration. */}
                     <br /><br />
                     If you are unable to find your school on the list below, it may be that your school has not yet been registered for the conference. The school registration form can be accessed through our registration page: www.cahsmun.org/register. Please note that it may take up to 48 hours after the submission of a school registration form for a school to show up on this form. If your school – instead of students paying individually – is completing a school payment, please check off the 'School Payment' option on this form. If that option does not appear, please let us know via email to file your school under School Payments.
                     <br /><br />
                     Before registering, please ensure that you have read all of our registration policies on our registration page. Additionally, please note that you cannot save your submission and return at a later time - your submission must be completed in one session.
                     <br /><br />
-                    Any questions regarding delegate registration or payment can be forwarded to Neil Hong, USG Delegate Affairs at delegates@cahsmun.org.
+                    Any questions regarding delegate registration or payment can be forwarded to our USG Delegate Affairs at delegates@cahsmun.org.
                     <br /><br />
                     Sincerely,<br />
                     The CAHSMUN Team
@@ -248,9 +320,9 @@ const DelegateRegistration = () => {
                 
                 <Alert severity="warning" style={{marginTop:'1rem'}}>
                     <AlertTitle>Important Notice</AlertTitle>
-                    Registration fees this year cover <b>ONLY the conference portion of CAHSMUN, with overnight hotel rooms being a separate cost</b>. For more information on booking hotel rooms, or to initiate a booking, contact Neil Hong, USG Delegate Affairs, at delegates@cahsmun.org.
-                    <br /><br />
-                    Additionally, we remind delegates that there will be four committees offered <b>only in the online format: SPECPOL, AU, UN Women, and UNSC</b>. In-person delegates will not be able to select these committees.
+                    Registration fees this year cover <b>ONLY the conference portion of CAHSMUN, with overnight hotel rooms being a separate cost</b>. For more information on booking hotel rooms, or to initiate a booking, contact our USG Delegate Affairs at delegates@cahsmun.org.
+                    {/* <br /><br />
+                    Additionally, we remind delegates that there will be four committees offered <b>only in the online format: SPECPOL, AU, UN Women, and UNSC</b>. In-person delegates will not be able to select these committees. */}
                 </Alert>
 
                 <hr />
@@ -417,7 +489,7 @@ const DelegateRegistration = () => {
                 <hr />
                 <Typography variant="subtitle1">Committee Selection</Typography>
                 <Typography style={{paddingTop: '1rem'}} variant="body1">
-                    Current availability is viewable here: <Link className="inline-link" to={"/matrix"} target="_blank">CAHSMUN 2022 Country Matrix.</Link>
+                    Current availability is viewable here: <Link className="inline-link" to={"/matrix"} target="_blank">CAHSMUN Country Matrix.</Link>
                     <br /><br />
                     Whenever possible, and when the delegate meets a suitable benchmark of prior experience, CAHSMUN 
                     strives to provide delegates with their first country preference. If the country is no longer 
@@ -544,30 +616,30 @@ const DelegateRegistration = () => {
 
 
                 <hr />
-                <Typography variant="subtitle1">Attendance</Typography>
+                <Typography variant="subtitle1">Payment Information</Typography>
 
-                <FormGroup style={{ margin: "20px 0" }}>
-                    {/* {cErr ? (<div className='error-help'> {cErr} </div>) : ''} */}
+                {/* <FormGroup style={{ margin: "20px 0" }}>
                     <RadioGroup aria-label="format" name="conferenceFormat" value={attendance} onChange={e=>{setAttendance(e.target.value); updateFormData("attendance", e.target.value)}}>
                         <FormControlLabel value="inperson" control={<Radio margin="dense"/>} label="In Person (Sheraton Wall Centre)" />
                         <FormControlLabel value="online" control={<Radio margin="dense"/>} label="Online" />
                     </RadioGroup>
-                </FormGroup>
+                </FormGroup> */}
 
                 {attendance && (<>
                     
-                <Typography variant="body1" style={{color: 'rgba(0, 0, 0, 0.54)'}}>Payment Information</Typography>
+                {/* <Typography variant="body1" style={{color: 'rgba(0, 0, 0, 0.54)'}}>Payment Information</Typography> */}
                 <Typography style={{ paddingTop: "1rem" }} variant="body1">
-                    All CAHSMUN fees are in Canadian dollars. 
+                    All CAHSMUN fees are in Canadian dollars.&nbsp;
                     {attendance === "inperson" && (<>
-                        The fee below only covers conference registration. <strong>Hotel rooms are NOT included in the registration fee</strong>; however, rooms can still be arranged directly with the Sheraton Wall Centre. For more information about our fees and rooming policies, you may read more at www.cahsmun.org/register. Please email Neil Hong at delegates@cahsmun.org if you have any questions about this policy.
+                        The fee below only covers conference registration. <strong>Hotel rooms are NOT included in the registration fee</strong>; however, rooms can still be arranged directly with the Sheraton Wall Centre. For more information about our fees and rooming policies, you may read more at www.cahsmun.org/register. Please email our Delegate Affairs at delegates@cahsmun.org if you have any questions about this policy.
                     </>)}
                     <br /><br />
                     Please note that your registration will not be processed until we have received your payment. You will automatically receive a receipt from Stripe if you pay by credit card.
                     <br /><br />
-                    Registration fee for this period:&nbsp;
+                    Registration fee for this period ({currentPeriod?.name} Registration):&nbsp;
                     <strong>
-                        {attendance === "inperson" ? "$195" : "$50"}
+                        {/* {attendance === "inperson" ? "$195" : "$50"} */}
+                        ${currentPeriod?.price} CAD
                     </strong>
                 </Typography>
                     
@@ -577,7 +649,7 @@ const DelegateRegistration = () => {
                 <hr />
                 <Typography variant="subtitle1">COVID-19 Safety Plan & Agreement</Typography>
                 <Typography style={{ padding: "1rem 0" }} variant="body1">
-                    By signing below, I confirm that I have read, understood, and agree to the COVID-19 Safety Plan published here. I understand my participation at CAHSMUN 2022 requires my full compliance with all safety policies and future changes.
+                    By signing below, I confirm that I have read, understood, and agree to the COVID-19 Safety Plan published here. I understand my participation at CAHSMUN {conferenceYear} requires my full compliance with all safety policies and future changes.
                     <br /><br />
                     <strong>
                         I confirm that I am not seeking an exemption from the proof of vaccination, universal masking, or rapid testing requirement.
@@ -617,6 +689,21 @@ const DelegateRegistration = () => {
                 </Button>
                 )}
 
+            </Container>
+        </div>
+    ) : (
+        <div className='app-container'>
+            <Container maxWidth='sm'>
+                <Link to={'/'}>
+                    <img src={LogoBlack} alt='logo' width='80px' style={{marginBottom: '1rem'}} />
+                </Link>
+                <Typography variant="h5">CAHSMUN {conferenceYear}</Typography>
+                <Typography variant="body1" style={{color: 'rgba(0, 0, 0, 0.54)'}}>Delegate Registration</Typography>
+
+                <Alert severity="warning" style={{marginTop:'1rem'}}>
+                    {/* <AlertTitle>Registration Success</AlertTitle> */}
+                    Registration is closed for CAHSMUN {conferenceYear}
+                </Alert>
             </Container>
         </div>
     )

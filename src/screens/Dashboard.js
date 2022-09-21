@@ -5,12 +5,14 @@ import {
     Container, 
     Grid,
     LinearProgress,
-    Typography
+    Typography,
+    Chip
 } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import Navigation from '../components/Navigation';
 import { useAuthContext } from "../authentication/AuthContext";
 import { API_URL } from "../config";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
 
@@ -25,6 +27,10 @@ const Dashboard = () => {
 
     // sponsor states
     const [schoolData, setSchoolData] = useState('');
+
+    // secretariat states
+    const [flagData, setFlagData] = useState('');
+    const [statsData, setStatsData] = useState({})
 
     async function loadSchoolData() {
         if(role === 'SPONSOR' || role === 'HEAD') {
@@ -42,15 +48,97 @@ const Dashboard = () => {
                 setDataLoading(false);
     
             } catch(error) {
-                console.log(error)
+                console.error(error)
             }
         } else {
             setDataLoading(false);
         }
     }
 
+    const parseFlagData = ({ featureFlags }) => {
+        const clean = {}
+        for(let i = 0; i < featureFlags.length; i++) {
+            const featureFlagPair = featureFlags[i]
+            clean[featureFlagPair.feature] = featureFlagPair.flag
+        }
+        return clean
+    }
+
+    async function loadFlagsData() {
+        setDataLoading(true)
+        
+        if(role === 'SECRETARIAT') {
+            try {
+                const res = await axios.get(`${API_URL}/auth/admin/flag/all`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'auth-token': currentUser
+                    }
+                })
+
+                setFlagData(parseFlagData(res.data))
+                setDataLoading(false)
+            } catch(error) {
+                console.error(error)
+            }
+        } else {
+            setDataLoading(false)
+        }
+    }
+
+    const getCommitteeAggregate = (committees) => {
+        const byComm = {}
+        
+        for (let i = 0; i < committees.length; i++) {
+            let totalCountries = committees[i].countries.length
+            let assignedCountries = 0
+
+            for (let j = 0; j < committees[i].countries.length; j++) {
+                if(committees[i].countries[j].assigned) {
+                    assignedCountries += 1
+                }
+            }
+            
+            byComm[committees[i].name] = {
+                total: totalCountries,
+                assigned: assignedCountries
+            }
+        }
+
+        return { total: committees.length, by_committee: byComm }
+    }
+
+    async function loadAggregatesData() {
+        setDataLoading(true)
+
+        if(role !== 'SECRETARIAT') return
+
+        try {
+            const { data } = await axios.get(`${API_URL}/secretariat/admin/stats`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'auth-token': currentUser
+                }
+            })
+
+            let committee_stats = getCommitteeAggregate(data.committees)
+
+            setStatsData({
+                committee_stats,
+                total_delegates: data.total_delegates,
+                total_schools: data.total_schools
+            })
+            setDataLoading(false)
+        } catch (error) {
+            console.error(error)
+            setDataLoading(false)
+        }
+    }
+
     useEffect(() => {
         loadSchoolData();
+        loadFlagsData();
+        loadAggregatesData();
     }, [dataRefresh]);
 
     return (
@@ -73,22 +161,22 @@ const Dashboard = () => {
                         <Grid container spacing={1} style={{marginTop: '3rem'}}>
                             <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>&mdash;</span>
+                                    <span className='big-text'>{statsData?.total_delegates || '-'}</span>
                                     <span>Delegates Registered</span>
                                 </div>
                             </Grid>
-                            <Grid item xs={4}>
+                            {/* <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>&mdash;</span>
+                                    <span className='big-text'>{statsData?.total_delegates_paid || '-'}</span>
                                     <span>Delegates Paid</span>
                                 </div>
                             </Grid>
                             <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>&mdash;</span>
+                                    <span className='big-text'>{statsData?.total_rooms_finalized || '-'}</span>
                                     <span>Rooms Set</span>
                                 </div>
-                            </Grid>
+                            </Grid> */}
                         </Grid>
 
                         <Alert severity="success" style={{marginTop:'3rem'}}>
@@ -96,11 +184,11 @@ const Dashboard = () => {
                             {schoolData ? schoolData.name : 'The school'} has been successfully registered.
                         </Alert>
 
-                        <Alert severity="warning" style={{marginTop:'1rem'}}>
+                        {/* <Alert severity="warning" style={{marginTop:'1rem'}}>
                             <AlertTitle>Limited Functionality</AlertTitle>
                             The CAHSMUN Campus is currently working at limited capacity. As conference day approaches, additional features such as 
                             rooming management and viewing delegate information will appear.
-                        </Alert>
+                        </Alert> */}
                     </Container>
                 ) : ''}
 
@@ -112,22 +200,22 @@ const Dashboard = () => {
                         <Grid container spacing={1} style={{marginTop: '3rem'}}>
                             <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>&mdash;</span>
+                                    <span className='big-text'>{statsData?.total_delegates || '-'}</span>
                                     <span>Delegates Registered</span>
                                 </div>
                             </Grid>
-                            <Grid item xs={4}>
+                            {/* <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>&mdash;</span>
+                                    <span className='big-text'>{statsData?.total_delegates_paid || '-'}</span>
                                     <span>Delegates Paid</span>
                                 </div>
                             </Grid>
                             <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>&mdash;</span>
+                                    <span className='big-text'>{statsData?.total_rooms_finalized || '-'}</span>
                                     <span>Rooms Set</span>
                                 </div>
-                            </Grid>
+                            </Grid> */}
                         </Grid>
 
                         
@@ -136,11 +224,11 @@ const Dashboard = () => {
                             {schoolData ? schoolData.name : 'The school'} has been successfully registered.
                         </Alert>
 
-                        <Alert severity="warning" style={{marginTop:'1rem'}}>
+                        {/* <Alert severity="warning" style={{marginTop:'1rem'}}>
                             <AlertTitle>Limited Functionality</AlertTitle>
                             The CAHSMUN Campus is currently working at limited capacity. As conference day approaches, additional features such as 
                             rooming management and viewing delegate information will appear.
-                        </Alert>
+                        </Alert> */}
                     </Container>
                 ) : ''}
 
@@ -148,36 +236,67 @@ const Dashboard = () => {
                     <Container maxWidth="md">
                         <Typography variant="subtitle1">Dashboard</Typography>
 
-                        
                         <Grid container spacing={1} style={{marginTop: '3rem'}}>
                             <Grid item xs={12}>
                             <Typography variant="subtitle2" style={{marginBottom: 10}}>Registration Numbers</Typography>
                             </Grid>
                             <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>&mdash;</span>
+                                    <span className='big-text'>{statsData?.total_delegates || '—'}</span>
                                     <span>Delegates Registered</span>
                                 </div>
                             </Grid>
                             <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>&mdash;</span>
+                                    <span className='big-text'>{statsData?.total_delegates_paid || '—'}</span>
                                     <span>Delegates Paid</span>
                                 </div>
                             </Grid>
                             <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>&mdash;</span>
+                                    <span className='big-text'>{statsData?.total_schools || '—'}</span>
                                     <span>Schools Registered</span>
                                 </div>
                             </Grid>
                         </Grid>
 
-                        <Alert severity="warning" style={{marginTop:'3rem'}}>
-                            <AlertTitle>Limited Functionality</AlertTitle>
-                            The CAHSMUN Campus is currently working at limited capacity. As conference day approaches, additional features such as 
-                            rooming management and viewing delegate information will appear.
-                        </Alert>
+
+                        <Grid container spacing={1} style={{marginTop: '3rem'}}>
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle2" style={{marginBottom: 10}}>Committee Numbers</Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <div className='outline-box'>
+                                    <span className='big-text'>{statsData?.committee_stats?.total || '—'}</span>
+                                    <span>Committees</span>
+
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '1.5rem',
+                                        paddingTop: '3rem'
+                                    }}>
+                                        {statsData?.committee_stats?.by_committee && Object.keys(statsData?.committee_stats?.by_committee).map((key, index) => {
+                                            const thisCommittee = statsData?.committee_stats?.by_committee[key] || 1
+                                            return (
+                                                <div key={index}>
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                        paddingBottom: '0.5rem'
+                                                    }}>
+                                                        <div style={{ fontWeight: 500 }}>{key}</div>
+                                                        <div>{thisCommittee.assigned}/{thisCommittee.total}</div>
+                                                    </div>
+                                                    <LinearProgress variant="determinate" size={10} value={Math.ceil(thisCommittee.assigned / thisCommittee.total)} />
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            </Grid>
+                        </Grid>
                     </Container>
                 ) : ''}
 

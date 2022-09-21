@@ -23,6 +23,9 @@ import Work from './screens/Chacuterie'
 // Sponsor screen imports
 import SponsorDelegates from './screens/sponsor/SponsorDelegates';
 import SponsorDetail from './screens/sponsor/SponsorDetail';
+import Setup from './screens/Setup';
+import DeepMatrix from './screens/secretariat/DeepMatrix';
+import Export from './screens/secretariat/Export';
 
 function App() {
 
@@ -96,13 +99,15 @@ function App() {
 
         <AuthRoute exact path='/dash' component={Dashboard} />
         
+        <SecretariatRoute exact path='/secretariat/setup' component={Setup} />
         <SecretariatRoute exact path='/secretariat/delegates' component={Delegates} />
         <SecretariatRoute exact path='/secretariat/delegates/detail/:id' component={DelegateDetail} />
-        {/* <SecretariatRoute exact path='/secretariat/matrix' component={Matrix} /> */}
+        <SecretariatRoute exact path='/secretariat/matrix' component={DeepMatrix} />
         <SecretariatRoute exact path='/secretariat/sponsors' component={Sponsors} />
         <SecretariatRoute exact path='/secretariat/sponsors/detail/:id' component={SponsorDetail} />
         <SecretariatRoute exact path='/secretariat/schools' component={Schools} />
         <SecretariatRoute exact path='/secretariat/schools/detail/:id' component={SchoolDetail} />
+        <SecretariatRoute exact path='/secretariat/export' component={Export} />
         
         <SponsorRoute exact path='/sponsor/delegates' component={SponsorDelegates} />
         {/* <SponsorRoute exact path='/sponsor/rooming' component={SponsorRooming} /> */}
