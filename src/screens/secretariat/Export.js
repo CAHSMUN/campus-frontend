@@ -88,7 +88,19 @@ const Export = () => {
         } else if (type === 'schools') {
             formattedData = data
         } else if (type === 'matrix') {
+            for (let i = 0; i < data.length; i++) {
+                const { countries } = data[i]
+                delete data[i]._id
+                delete data[i].__v
 
+                const strippedCountries = countries?.map((country) => (country.name))
+
+                for (let j = 0; j < countries?.length || 0; j++) {
+                    data[i].countries = JSON.stringify(strippedCountries)
+                }
+            }
+
+            formattedData = data
         }
 
         return formattedData

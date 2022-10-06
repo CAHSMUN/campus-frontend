@@ -11,10 +11,12 @@ import Navigation from '../../components/Navigation';
 import { useAuthContext } from "../../authentication/AuthContext";
 import { API_URL } from "../../config";
 import axios from "axios";
+import { useHistory } from "react-router-dom";
 
 const DelegateDetail = ({ match }) => {
 
     const { currentUser } = useAuthContext();
+    const history = useHistory()
     
     // const history = useHistory();
 
@@ -96,6 +98,31 @@ const DelegateDetail = ({ match }) => {
         loadDelegate()
     }, [])
 
+    const [isLoadingDelete, setIsLoadingDelete] = useState(false)
+
+    async function handleDeleteDelegate() {
+        if(isLoadingDelete) return
+        setIsLoadingDelete(true)
+        
+        if(!typeof id === "string") return
+
+        try {
+            let res = await axios.delete(`${API_URL}/delegates/${match.params.id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'auth-token': currentUser,
+                }
+            });
+
+            console.log(res.status)
+            
+            setIsLoadingDelete(false)
+            history.push('/secretariat/delegates')
+        } catch(error) {
+            setIsLoadingDelete(false)
+        }
+    }
+
     return (
         <div className='app-container'>
             <Navigation />
@@ -128,6 +155,18 @@ const DelegateDetail = ({ match }) => {
                             ) : ''
                         })}
                     </div>
+                </Card>
+
+                <Card style={{ marginTop: '2rem' }}>
+                    <Typography variant="subtitle1" style={{paddingBottom: '1rem', color: '#940000'}}>Danger Zone</Typography>
+                    
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        disabled={isLoadingDelete}
+                        onClick={handleDeleteDelegate}>
+                        Delete Delegate
+                    </Button>
                 </Card>
             </Container>
         </div>

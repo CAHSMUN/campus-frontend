@@ -1,13 +1,13 @@
-const DEV = false;
+const DEV = true;
 
 const API_URL = DEV ? 'http://localhost:8080' : 'https://api.cahsmun.org';
 
-const STRIPE_KEY = 'pk_live_QsVHlOazYKOg4m52Nona47s200YWABF3Qy'
+const STRIPE_KEY = DEV ? 'pk_test_4HfflbdwiXNK9C0a0BEhSHO200h2DSIEZd' : 'pk_live_QsVHlOazYKOg4m52Nona47s200YWABF3Qy'
 
 const PAYMENTS = {
     test: {
         name: 'Test',
-        price_id: 'prod_IMQ47jBQbTnZiB',
+        price_id: 'price_1LkI8XGtvL665mVpzfXvCZL4',
     },
     early: {
         name: 'Early',

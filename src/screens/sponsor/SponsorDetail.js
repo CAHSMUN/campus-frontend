@@ -1,9 +1,11 @@
 import {
+    Button,
     Card,
     Container, Typography
 } from '@material-ui/core';
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useHistory } from 'react-router-dom';
 import { useAuthContext } from "../../authentication/AuthContext";
 import Navigation from '../../components/Navigation';
 import { API_URL } from "../../config";
@@ -12,7 +14,7 @@ const SponsorDetail = ({ match }) => {
 
     const { currentUser } = useAuthContext();
     
-    // const history = useHistory();
+    const history = useHistory();
 
     const [dataLoading, setDataLoading] = useState(true);
     const [dataRefresh, setDataRefresh] = useState(false);
@@ -76,6 +78,32 @@ const SponsorDetail = ({ match }) => {
             setDisplaySponsorData(displayData);
         }
     }, [match, sponsorData, dataRefresh]);
+    
+
+    const [isLoadingDelete, setIsLoadingDelete] = useState(false)
+
+    async function handleDeleteSponsor() {
+        if(isLoadingDelete) return
+        setIsLoadingDelete(true)
+        
+        if(!typeof id === "string") return
+
+        try {
+            let res = await axios.delete(`${API_URL}/sponsors/${match.params.id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'auth-token': currentUser,
+                }
+            });
+
+            console.log(res.status)
+            
+            setIsLoadingDelete(false)
+            history.push('/secretariat/sponsors')
+        } catch(error) {
+            setIsLoadingDelete(false)
+        }
+    }
 
     return (
         <div className='app-container'>
@@ -92,6 +120,20 @@ const SponsorDetail = ({ match }) => {
                     <div className="detail-grid">
                         {displaySponsorData}
                     </div>
+                </Card>
+                
+                <Card style={{ marginTop: '2rem' }}>
+                    <Typography variant="subtitle1" style={{paddingBottom: '1rem', color: '#940000'}}>Danger Zone</Typography>
+
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        disabled={isLoadingDelete}
+                        onClick={handleDeleteSponsor}>
+                        Delete Delegate
+                    </Button>
+                    
+                    <Typography variant="paragraph" style={{paddingLeft: '1rem', color: '#940000'}}>Make sure no active schools are registered with this sponsor</Typography>
                 </Card>
             </Container>
         </div>

@@ -33,7 +33,7 @@ const Delegates = () => {
                     'auth-token': currentUser,
                 }
             });
-            console.log(res.data)
+            // console.log(res.data)
             let functional_list = res.data.map((item) => {return {...item, school: schoolsMap[item.school], action: {school_id: item._id, detail_fn: handleDetail}} });
             setDelegatesData(functional_list);
 

@@ -108,10 +108,32 @@ const Dashboard = () => {
         return { total: committees.length, by_committee: byComm }
     }
 
+    async function loadSponsorData() {
+
+        try {
+            const { data } = await axios.get(`${API_URL}/sponsors/stats/${schoolID}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'auth-token': currentUser
+                }
+            })
+
+            setStatsData({
+                total_delegates: data
+            })
+            setDataLoading(false)
+        } catch (error) {
+            console.error(error)
+            setDataLoading(false)
+        }
+    }
+
     async function loadAggregatesData() {
         setDataLoading(true)
 
-        if(role !== 'SECRETARIAT') return
+        if(role !== 'SECRETARIAT') {
+            return await loadSponsorData()
+        }
 
         try {
             const { data } = await axios.get(`${API_URL}/secretariat/admin/stats`, {
@@ -161,7 +183,7 @@ const Dashboard = () => {
                         <Grid container spacing={1} style={{marginTop: '3rem'}}>
                             <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>{statsData?.total_delegates || '-'}</span>
+                                    <span className='big-text'>{statsData?.total_delegates || '0'}</span>
                                     <span>Delegates Registered</span>
                                 </div>
                             </Grid>
@@ -200,7 +222,7 @@ const Dashboard = () => {
                         <Grid container spacing={1} style={{marginTop: '3rem'}}>
                             <Grid item xs={4}>
                                 <div className='outline-box'>
-                                    <span className='big-text'>{statsData?.total_delegates || '-'}</span>
+                                    <span className='big-text'>{statsData?.total_delegates || '0'}</span>
                                     <span>Delegates Registered</span>
                                 </div>
                             </Grid>

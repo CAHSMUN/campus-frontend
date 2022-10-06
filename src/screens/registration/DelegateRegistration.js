@@ -21,7 +21,7 @@ import { Link } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 
 import LogoBlack from '../../img/black.png';
-import { API_URL, getCurrentPayment, STRIPE_KEY } from '../../config';
+import { API_URL, getCurrentPayment, PAYMENTS, STRIPE_KEY } from '../../config';
 import FormInput from '../../components/FormInput';
 import FormSelect from '../../components/FormSelect';
 
@@ -49,6 +49,7 @@ const emptyFormState = {
     prefTwoCountry: '',
     prefThreeComm: '', // ID reference
     prefThreeCountry: '',
+    prefReason: '',
     numPrevConferences: '', // number of previous conferences
     pastConferences: '', // past conferences and awards
     signature: '', // signature to abide by COVID policy
@@ -58,6 +59,7 @@ const emptyFormState = {
 const DelegateRegistration = () => {
 
     const stripePromise = loadStripe(STRIPE_KEY)
+    // const stripePromise = loadStripe('pk_test_4HfflbdwiXNK9C0a0BEhSHO200h2DSIEZd')
 
     const [regSuccess, setRegSuccess] = useState(false);
     const [loading, setLoading] = useState(false); // proceed to payment
@@ -71,6 +73,8 @@ const DelegateRegistration = () => {
     const [regOpen, setRegOpen] = useState(true)
     const [registrationPeriods, setRegistrationPeriods] = useState()
     const [currentPeriod, setCurrentPeriod] = useState()
+
+    const [formErrors, setFormErrors] = useState(emptyFormState)
 
     const renderSchools = (data) => {
         let renderData = [];
@@ -169,7 +173,6 @@ const DelegateRegistration = () => {
                 }
             }).then((res) => res.json()).then((data) => {
                 price = data.unit_amount_decimal.substring(0, data.unit_amount_decimal.length - 2)
-                console.log(price)
             })
 
 
@@ -189,12 +192,12 @@ const DelegateRegistration = () => {
 
 
 
-
     const [capacity, setCapacity] = useState('') // is head delegate or not? CONDITIONAL: create delegate or update in backend
     const [attendance, setAttendance] = useState('inperson') // is online or inperson // REVISION: Fully in person
 
     // Registration information
     const [formData, setFormData] = useState({});
+    const [formError, setFormError] = useState(false)
 
     // display committees and countries on form
     
@@ -233,21 +236,74 @@ const DelegateRegistration = () => {
         setFormData(newFormData)
     }
 
+    const validifyFormData = async () => {
+        let currentErrors = JSON.parse(JSON.stringify(formErrors))
+        let valid = true
+
+        const NO_EMPTY = [
+            'capacity',
+            'email',
+            'firstName',
+            'lastName',
+            'grade',
+            'school',
+            'sex',
+            'phoneNumber',
+            'postal',
+            'ec_firstName',
+            'ec_lastName',
+            'ec_relationship',
+            'ec_phoneNumber',
+            'prefOneComm',
+            'prefOneCountry',
+            'prefTwoComm',
+            'prefTwoCountry',
+            'prefThreeComm',
+            'prefThreeCountry',
+            'numPrevConferences',
+            'pastConferences',
+            'signature',
+        ]
+
+        // check if empty
+        for (let i = 0; i < NO_EMPTY.length; i++) {
+            if (!formData[NO_EMPTY[i]] || formData[NO_EMPTY[i]] === '') {
+                valid = false
+                currentErrors[NO_EMPTY[i]] = 'This field is necessary'
+            }
+        }
+
+        // passcode
+        if (formData.capacity === 'regular' && !formData.passcode) {
+            valid = false
+            currentErrors.passcode = 'Passcode is necessary'
+        }
+
+        
+        if (!valid) {
+            setFormError(true)
+        }
+        setFormErrors(currentErrors)
+        return valid
+    }
 
     const handleRegister = async () => {
-        // should save and then go to stripe payment
         if (loading) return
 
-        // debug only rn
-        setLoading(!loading);
+        setLoading(true)
+        setFormErrors({})
+        setFormError(false)
+
+        const isValid = await validifyFormData()
+        if (!isValid) {
+            return setLoading(false)
+        }
 
         // All verified by now
         axios
         .post(`${API_URL}/delegates/register/${formData.capacity === "head" ? "head" : "regular"}`, formData)
         .then((res) => {
-        
-            setLoading(false);
-            
+
         }).catch((error) => {
             setLoading(false);
             if(error.response) {
@@ -259,23 +315,26 @@ const DelegateRegistration = () => {
 
         const stripe = await stripePromise
             
-            // proceed to payment
-            const { error } = await stripe.redirectToCheckout({
-                lineItems: [{
-                    price: currentPeriod.price_id, // Replace with the ID of your price TODO 
-                    quantity: 1,
-                }],
-                mode: 'payment',
-                successUrl: 'https://register.cahsmun.org/success',
-                cancelUrl: 'https://register.cahsmun.org/cancel',
-                customerEmail: formData.email,
-            });
+        // proceed to payment
+        const { error } = await stripe.redirectToCheckout({
+            lineItems: [{
+                price: currentPeriod.price_id, // Replace with the ID of your price TODO 
+                // price: PAYMENTS.test.price_id,
+                quantity: 1,
+            }],
+            mode: 'payment',
+            successUrl: 'https://campus.cahsmun.org/success',
+            cancelUrl: 'https://campus.cahsmun.org/cancel',
+            customerEmail: formData.email,
+        });
 
-            setRegSuccess(true);
+        setRegSuccess(true);
             
-            if (error) {
-                console.error(error)
-            }
+        if (error) {
+            console.error(error)
+        }
+        
+        setLoading(false);
     }
 
 
@@ -350,9 +409,9 @@ const DelegateRegistration = () => {
                         value={formData.email} 
                         onChange={e=>updateFormData("email", e.target.value)} 
                         label="Email"
-                        // error={eErr} 
+                        error={formErrors.email} 
+                        helperText={'hello'}
                         />
-                        {/* {eErr ? (<div className='error-help'> {eErr} </div>) : ''} */}
                     </Grid>
                     {formData.capacity === "delegate" && (
                     <Grid item xs={6}>
@@ -362,9 +421,9 @@ const DelegateRegistration = () => {
                         onChange={e=>updateFormData("passcode", e.target.value)} 
                         label="Passcode"
                         type="password"
-                        // error={passErr}
+                        error={formErrors?.passcode}
                          />
-                        {/* {passErr ? (<div className='error-help'> {passErr} </div>) : ''} */}
+                        {formErrors?.passcode ? (<div className='error-help'> {formErrors?.passcode} </div>) : ''}
                     </Grid>
                     )}
                 </Grid>
@@ -381,23 +440,41 @@ const DelegateRegistration = () => {
                         required
                         value={formData.firstName} 
                         onChange={e=>updateFormData("firstName", e.target.value)} 
-                        label="First Name"/>
+                        label="First Name"
+                        error={formErrors?.firstName} />
                     </Grid>
                     <Grid item xs={6}>
                         <FormInput 
                         required
                         value={formData.lastName} 
                         onChange={e=>updateFormData("lastName", e.target.value)} 
-                        label="Last Name" />
+                        label="Last Name"
+                        error={formErrors?.lastName}  />
                     </Grid>
                 </Grid>
                 
                 
-                <FormInput 
+                <FormSelect
+                    required
+                    margin="normal"
+                    label="Grade"
+                    labelID="grade"
+                    value={formData.grade}
+                    onChange={e=>updateFormData("grade", e.target.value)}
+                    error={formErrors?.grade} >
+                    <MenuItem value="7">7</MenuItem>
+                    <MenuItem value="8">8</MenuItem>
+                    <MenuItem value="9">9</MenuItem>
+                    <MenuItem value="10">10</MenuItem>
+                    <MenuItem value="11">11</MenuItem>
+                    <MenuItem value="12">12</MenuItem>
+                </FormSelect>
+                {/* <FormInput 
                     required
                     value={formData.grade} 
                     label="Grade"
-                    onChange={e=>updateFormData("grade", e.target.value)} />
+                    onChange={e=>updateFormData("grade", e.target.value)}
+                    error={formErrors?.grade}  /> */}
 
                 <FormSelect
                     required
@@ -405,51 +482,57 @@ const DelegateRegistration = () => {
                     label="School"
                     labelID="school"
                     value={formData.school}
-                    onChange={e=>updateFormData("school", e.target.value)}>
+                    onChange={e=>updateFormData("school", e.target.value)}
+                    error={formErrors?.school} >
                     {displaySchools}
                 </FormSelect>
 
                 <FormSelect
                     required
                     margin="normal"
-                    label="Sex"
+                    label="Gender"
                     labelID="sex"
                     value={formData.sex}
-                    onChange={e=>updateFormData("sex", e.target.value)}>
+                    onChange={e=>updateFormData("sex", e.target.value)}
+                    error={formErrors?.sex} >
                     <MenuItem value="male">Male</MenuItem>
                     <MenuItem value="female">Female</MenuItem>
+                    <MenuItem value="x">X</MenuItem>
+                    <MenuItem value="noanswer">Prefer not to answer</MenuItem>
                 </FormSelect>
                 
                 <FormInput 
                     required
                     value={formData.phoneNumber} 
                     label="Phone Number"
-                    onChange={e=>updateFormData("phoneNumber", e.target.value)} />
+                    onChange={e=>updateFormData("phoneNumber", e.target.value)} 
+                    error={formErrors?.phoneNumber} />
 
                     
                 <FormInput 
                     required
                     value={formData.postal} 
                     label="Postal Code/Zip Number"
-                    onChange={e=>updateFormData("postal", e.target.value)} />
+                    onChange={e=>updateFormData("postal", e.target.value)} 
+                    error={formErrors?.postal} />
 
                 
                 <FormSelect
-                    required
                     margin="normal"
                     label="Who referred you to CAHSMUN?"
                     labelID="refereePosition"
                     value={formData.refereePosition}
-                    onChange={e=>updateFormData("refereePosition", e.target.value)}>
+                    onChange={e=>updateFormData("refereePosition", e.target.value)}
+                    error={formErrors?.refereePosition} >
                     <MenuItem value="delegate">Delegate</MenuItem>
                     <MenuItem value="staff">Staff/Secretariat Member</MenuItem>
                 </FormSelect>
 
                 <FormInput 
-                    required
                     value={formData.refereeName} 
                     label="Name of Reference"
-                    onChange={e=>updateFormData("refereeName", e.target.value)} />
+                    onChange={e=>updateFormData("refereeName", e.target.value)}
+                    error={formErrors?.refereeName}  />
 
 
                 <hr />
@@ -462,14 +545,16 @@ const DelegateRegistration = () => {
                         required
                         value={formData.ec_firstName} 
                         onChange={e=>updateFormData("ec_firstName", e.target.value)} 
-                        label="First Name"/>
+                        label="First Name"
+                        error={formErrors?.ec_firstName} />
                     </Grid>
                     <Grid item xs={6}>
                         <FormInput 
                         required
                         value={formData.ec_lastName} 
                         onChange={e=>updateFormData("ec_lastName", e.target.value)} 
-                        label="Last Name" />
+                        label="Last Name"
+                        error={formErrors?.ec_lastName}  />
                     </Grid>
                 </Grid>
 
@@ -477,13 +562,15 @@ const DelegateRegistration = () => {
                     required
                     value={formData.ec_relationship} 
                     label="Relationship to Delegate"
-                    onChange={e=>updateFormData("ec_relationship", e.target.value)} />
+                    onChange={e=>updateFormData("ec_relationship", e.target.value)}
+                    error={formErrors?.ec_relationship}  />
 
                 <FormInput 
                     required
                     value={formData.ec_phoneNumber} 
                     label="Phone Number"
-                    onChange={e=>updateFormData("ec_phoneNumber", e.target.value)} />
+                    onChange={e=>updateFormData("ec_phoneNumber", e.target.value)}
+                    error={formErrors?.ec_phoneNumber}  />
 
 
                 <hr />
@@ -585,6 +672,17 @@ const DelegateRegistration = () => {
                             onChange={e=>updateFormData("prefThreeCountry", e.target.value)}>
                             {displayCountriesThree}
                         </FormSelect>
+                    </Grid>
+
+                    {/* PREFERENCE EXPLANATION */}
+                    <Grid item xs={12} style={{ paddingTop: "1rem" }}>
+                        <Typography variant="body1" style={{color: 'rgba(0, 0, 0, 0.54)'}}>Reason(s) for preference</Typography>
+                        <FormInput
+                            value={formData.prefReason} 
+                            label="Briefly justify your committee and country preferences"
+                            onChange={e=>updateFormData("prefReason", e.target.value)} 
+                            multiline={true}
+                            rows={5} />
                     </Grid>
                 </Grid>
 
@@ -688,6 +786,12 @@ const DelegateRegistration = () => {
                     )}
                 </Button>
                 )}
+                {formError ? (
+                <Alert severity="error" style={{marginTop:'1rem'}}>
+                    <AlertTitle>Submission Error</AlertTitle>
+                    Please review the form and review that all required fields (marked with an asterix) have been filled out
+                </Alert>
+                ) : ''}
 
             </Container>
         </div>

@@ -414,6 +414,7 @@ const SchoolRegistration = () => {
                         <Grid container spacing={2}>
                             <Grid item xs={6}>
                                 <TextField 
+                                required
                                 color='secondary'
                                 value={name} 
                                 onChange={e=>setName(e.target.value)} 
@@ -427,6 +428,7 @@ const SchoolRegistration = () => {
                             </Grid>
                             <Grid item xs={6}>
                                 <TextField 
+                                required
                                 color='secondary'
                                 value={phone} 
                                 onChange={e=>setPhone(e.target.value)} 

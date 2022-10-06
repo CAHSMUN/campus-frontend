@@ -39,20 +39,22 @@ const DelegatesList = (props) => {
         sortable: false,
         selectable: false,
         flex: 1,
-        renderCell: (params) => (
-          <div style={{
-              display: 'table',
-              paddingRight: 5,
-              overflow: 'auto',
-          }}>
-            <Button
-              variant="text"
-              color="primary"
-              onClick={e=>params.value.detail_fn(`./delegates/detail/${params.value.school_id}`)}>
-                Details
-            </Button>
-          </div>
-        ),
+        renderCell: (params) => {
+          return params.value ? (
+            <div style={{
+                display: 'table',
+                paddingRight: 5,
+                overflow: 'auto',
+            }}>
+              <Button
+                variant="text"
+                color="primary"
+                onClick={e=>params.value.detail_fn(`./delegates/detail/${params.value.school_id}`)}>
+                  Details
+              </Button>
+            </div>
+          ) : (<></>)
+        },
       },
     ];
 

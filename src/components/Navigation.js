@@ -128,27 +128,27 @@ const Navigation = () => {
                 
                 {(role === 'SPONSOR') ? (
                     <>
-                        <ListItem button disabled className={classes.menuLink} component={NavLink} exact to="/sponsor/delegates" activeStyle={linkActiveStyle}>
+                        <ListItem button className={classes.menuLink} component={NavLink} exact to="/sponsor/delegates" activeStyle={linkActiveStyle}>
                             <PersonIcon className={classes.icons} />
                             <ListItemText disableTypography primary={'Delegates'} />
                         </ListItem>
-                        <ListItem button disabled className={classes.menuLink} component={NavLink} exact to="/sponsor/rooming" activeStyle={linkActiveStyle}>
+                        {/* <ListItem button disabled className={classes.menuLink} component={NavLink} exact to="/sponsor/rooming" activeStyle={linkActiveStyle}>
                             <PersonIcon className={classes.icons} />
                             <ListItemText disableTypography primary={'Rooming'} />
-                        </ListItem>
+                        </ListItem> */}
                     </>
                 ) : ''}
                 
                 {(role === 'HEAD') ? (
                     <>
-                        <ListItem button disabled className={classes.menuLink} component={NavLink} exact to="/head/delegates" activeStyle={linkActiveStyle}>
+                        <ListItem button className={classes.menuLink} component={NavLink} exact to="/head/delegates" activeStyle={linkActiveStyle}>
                             <PersonIcon className={classes.icons} />
                             <ListItemText disableTypography primary={'Delegates'} />
                         </ListItem>
-                        <ListItem button disabled className={classes.menuLink} component={NavLink} exact to="/head/rooming" activeStyle={linkActiveStyle}>
+                        {/* <ListItem button disabled className={classes.menuLink} component={NavLink} exact to="/head/rooming" activeStyle={linkActiveStyle}>
                             <PersonIcon className={classes.icons} />
                             <ListItemText disableTypography primary={'Rooming'} />
-                        </ListItem>
+                        </ListItem> */}
                     </>
                 ) : ''}
                

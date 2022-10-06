@@ -26,6 +26,9 @@ import SponsorDetail from './screens/sponsor/SponsorDetail';
 import Setup from './screens/Setup';
 import DeepMatrix from './screens/secretariat/DeepMatrix';
 import Export from './screens/secretariat/Export';
+import DelegateCancel from './screens/registration/DelegateCancel';
+import DelegateSuccess from './screens/registration/DelegateSuccess';
+import HeadDelegates from './screens/head/HeadDelegates';
 
 function App() {
 
@@ -82,18 +85,35 @@ function App() {
     )
   }
 
+  function HeadRoute({ component: Component, ...rest}) {
+    const { currentUser, getUserData } = useAuthContext();
+    const role = currentUser ? getUserData().role : '';
+
+    return (
+      <Route
+        {...rest}
+          render={(props) => 
+            (role === 'HEAD') ? (
+              <Component {...props} />
+            ) : (
+              <Redirect to='/' />
+            )
+          }
+        />
+    )
+  }
+
   return (
     <AuthProvider>
       <Switch>
-
-        
         <Route exact path='/work' component={Work} />
-
 
         <Route exact path='/' component={Home} />
         <Route exact path='/login' component={Login} />
         
         <Route exact path='/register/delegate' component={DelegateRegistration} />
+        <Route exact path='/success' component={DelegateSuccess} />
+        <Route exact path='/cancel' component={DelegateCancel} />
         <Route exact path='/register/school' component={SchoolRegistration} />
         <Route exact path='/matrix' component={Matrix} />
 
@@ -112,7 +132,7 @@ function App() {
         <SponsorRoute exact path='/sponsor/delegates' component={SponsorDelegates} />
         {/* <SponsorRoute exact path='/sponsor/rooming' component={SponsorRooming} /> */}
         
-        {/* <HeadRoute exact path='/head/delegates' component={HeadDelegates} /> */}
+        <HeadRoute exact path='/head/delegates' component={HeadDelegates} />
         {/* <HeadRoute exact path='/head/rooming' component={HeadRooming} /> */}
 
       </Switch>

@@ -11,7 +11,7 @@ import { API_URL } from "../../config";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
 
-const SponsorDelegates = () => {
+const HeadDelegates = () => {
 
     const { currentUser, getUserData } = useAuthContext();
     const userData = getUserData();
@@ -94,4 +94,4 @@ const SponsorDelegates = () => {
     )
 }
 
-export default SponsorDelegates;
+export default HeadDelegates;
